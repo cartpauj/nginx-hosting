@@ -13,7 +13,10 @@ RELEASE=false
 [ "${1:-}" = "--release" ] && RELEASE=true
 
 VERSION=${NGINX_VERSION:-$(curl -fsSL https://nginx.org/en/download.html | grep -o 'Stable version.*' | grep -oE 'nginx-1\.[0-9]+\.[0-9]+' | head -1 | cut -d- -f2)}
-echo "Building nginx $VERSION"
+# Release tag: nginx-<version>, or nginx-<version>-2, -3... when rebuilding the same version.
+TAG="nginx-$VERSION"; N=1
+while gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; do N=$((N+1)); TAG="nginx-$VERSION-$N"; done
+echo "Building nginx $VERSION ($TAG)"
 
 gh workflow run build.yml -R "$REPO" --ref main -f version="$VERSION"
 sleep 10
@@ -22,7 +25,7 @@ RUN_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
 echo "Build running: $RUN_URL"
 gh run watch "$RUN_ID" -R "$REPO" --exit-status --interval 30 >/dev/null
 
-OUT="$HERE/builds/$VERSION"
+OUT="$HERE/builds/${TAG#nginx-}"
 rm -rf "$OUT" && mkdir -p "$OUT"
 gh run download "$RUN_ID" -R "$REPO" -D "$OUT"
 mv "$OUT/nginx-$VERSION"/* "$OUT/" && rmdir "$OUT/nginx-$VERSION"
@@ -42,7 +45,7 @@ $(cat SHA256SUMS)
 NOTES
 
 if $RELEASE; then
-  gh release create "nginx-$VERSION" nginx SHA256SUMS checks.txt -R "$REPO" --target main \
-    --title "nginx $VERSION for hosting (Ubuntu 18.04)" --notes-file notes.md
+  gh release create "$TAG" nginx SHA256SUMS checks.txt -R "$REPO" --target main \
+    --title "nginx ${TAG#nginx-} for hosting (Ubuntu 18.04)" --notes-file notes.md
 fi
 echo "Done: $OUT"

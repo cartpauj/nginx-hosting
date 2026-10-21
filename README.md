@@ -12,21 +12,20 @@ own updates (Ubuntu ESM); nothing is bundled.
 
 ## Build options
 
-Copied from the server's own `nginx -V` (same config, log, pid and `/var/lib/nginx` temp paths,
-same hardening flags), except:
+Only what the server's config uses: SSL, HTTP/2, realip, rewrite, gzip, fastcgi, geo, map,
+access, index and logging. Everything else is left out (proxy, gRPC, SSI, charset, basic auth,
+rate limiting, upstream balancers, dav, slice, mail, stream, all add-on modules...), so fewer
+future advisories apply. Needing one of those later means a rebuild: add it in
+`build-in-container.sh`.
 
-- no dynamic modules (Brotli, GeoIP, image-filter, XSLT, ssl-ct...), so no `--with-compat`/`--modules-path`
-- no dav or slice (unused, 2026 CVEs)
-- no `--with-debug`
-- the old build machine's `-fdebug-prefix-map` flag removed
-
-Compiled in: SSL, HTTP/2, realip, auth_request, gzip_static, threads, stub_status, sub, addition,
-gunzip.
+Paths (config, logs, pid, `/var/lib/nginx` temp dirs) and hardening flags match the server's old
+Ubuntu nginx. The binary is stripped (no debug info).
 
 ## Building a new version
 
 ```
 ./build.sh            # newest stable from nginx.org, saved in builds/<version>/
+                      # (rebuilding the same version becomes <version>-2, -3...)
 ./build.sh --release  # same, then publish a public GitHub Release
 ```
 
