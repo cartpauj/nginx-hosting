@@ -12,14 +12,16 @@ own updates (Ubuntu ESM); nothing is bundled.
 
 ## Build options
 
-Same as Ubuntu's nginx (same config, log, pid and `/var/lib/nginx` temp paths), except:
+Copied from the server's own `nginx -V` (same config, log, pid and `/var/lib/nginx` temp paths,
+same hardening flags), except:
 
-- no dynamic modules (Brotli, GeoIP, image-filter, XSLT, ssl-ct...), mail or stream
-- no dav or slice
-- Ubuntu's build-machine compiler flags replaced with plain hardening flags
+- no dynamic modules (Brotli, GeoIP, image-filter, XSLT, ssl-ct...), so no `--with-compat`/`--modules-path`
+- no dav or slice (unused, 2026 CVEs)
+- no `--with-debug`
+- the old build machine's `-fdebug-prefix-map` flag removed
 
 Compiled in: SSL, HTTP/2, realip, auth_request, gzip_static, threads, stub_status, sub, addition,
-gunzip, secure_link, random_index, flv, mp4.
+gunzip.
 
 ## Building a new version
 
@@ -34,7 +36,8 @@ Takes about 2 minutes. Review `builds/<version>/checks.txt` before releasing.
 
 Needs `libpcre2-8-0` (`apt install libpcre2-8-0`). Put the binary at `/opt/nginx/sbin/nginx`,
 remove `include /etc/nginx/modules-enabled/*.conf;` from nginx.conf, test with
-`sudo /opt/nginx/sbin/nginx -t`, then point the systemd service at it.
+`sudo /opt/nginx/sbin/nginx -t`, then point the systemd service at it. Certbot renews using
+`/usr/sbin/nginx`, so point that at the new binary too and prove it with `sudo certbot renew --dry-run`.
 
 ## Builds
 

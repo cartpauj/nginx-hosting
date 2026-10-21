@@ -20,9 +20,10 @@ gpg --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz"
 tar xzf "nginx-$NGINX_VERSION.tar.gz"
 cd "nginx-$NGINX_VERSION"
 
-# Ubuntu's own build options (from `nginx -V` on the droplet), minus: the build machine's
-# --with-cc-opt/--with-ld-opt (replaced by plain hardening flags), all dynamic modules
-# (none are used), mail, stream, dav and slice. OpenSSL, PCRE2 and zlib come from the
+# The droplet's own build options (its `nginx -V`), minus: the old build machine's
+# -fdebug-prefix-map/-Wdate-time flags, dav and slice (unused, 2026 CVEs), --with-debug
+# (debug logging code production doesn't need), and --with-compat/--modules-path (only for
+# loadable modules; none are used). OpenSSL, PCRE2 and zlib come from the
 # system so the droplet's ESM updates keep patching them.
 ./configure \
   --with-cc-opt='-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -fPIC -D_FORTIFY_SOURCE=2' \
@@ -33,14 +34,11 @@ cd "nginx-$NGINX_VERSION"
   --error-log-path=/var/log/nginx/error.log \
   --lock-path=/var/lock/nginx.lock \
   --pid-path=/run/nginx.pid \
-  --modules-path=/usr/lib/nginx/modules \
   --http-client-body-temp-path=/var/lib/nginx/body \
   --http-fastcgi-temp-path=/var/lib/nginx/fastcgi \
   --http-proxy-temp-path=/var/lib/nginx/proxy \
   --http-scgi-temp-path=/var/lib/nginx/scgi \
   --http-uwsgi-temp-path=/var/lib/nginx/uwsgi \
-  --with-compat \
-  --with-debug \
   --with-pcre-jit \
   --with-http_ssl_module \
   --with-http_stub_status_module \
@@ -49,12 +47,8 @@ cd "nginx-$NGINX_VERSION"
   --with-http_v2_module \
   --with-threads \
   --with-http_addition_module \
-  --with-http_flv_module \
   --with-http_gunzip_module \
   --with-http_gzip_static_module \
-  --with-http_mp4_module \
-  --with-http_random_index_module \
-  --with-http_secure_link_module \
   --with-http_sub_module
 make -j"$(nproc)" >/dev/null
 
