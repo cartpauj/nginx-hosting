@@ -1,0 +1,22 @@
+name: Build nginx
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: nginx version, e.g. 1.30.6
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # GitHub's own steps can't run inside an 18.04 container (its C library is too old),
+      # so only the compile runs there.
+      - name: Build inside Ubuntu 18.04
+        env:
+          NGINX_VERSION: ${{ inputs.version }}
+        run: docker run --rm -v "$PWD:/work" -w /work -e NGINX_VERSION ubuntu:18.04 bash build-in-container.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nginx-${{ inputs.version }}
+          path: out/
