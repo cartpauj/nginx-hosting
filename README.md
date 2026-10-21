@@ -43,4 +43,4 @@ remove `include /etc/nginx/modules-enabled/*.conf;` from nginx.conf, test with
 
 | Version | Date | Run | Release |
 |---|---|---|---|
-| 1.30.6 | 2026-10-21 | [39676419807](https://github.com/cartpauj/nginx-hosting/actions/runs/39676419807) | [nginx-1.30.6](https://github.com/cartpauj/nginx-hosting/releases/tag/nginx-1.30.6) |
+| 1.30.6 | 2026-10-21 | [39677201752](https://github.com/cartpauj/nginx-hosting/actions/runs/39677201752) | [nginx-1.30.6](https://github.com/cartpauj/nginx-hosting/releases/tag/nginx-1.30.6) |
