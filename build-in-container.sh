@@ -14,7 +14,7 @@ cd "$WORK"
 curl -fsSLO "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz"
 curl -fsSLO "https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc"
 for k in $(curl -fsSL https://nginx.org/en/pgp_keys.html | grep -oE '/keys/[A-Za-z0-9_.-]+\.key' | sort -u); do
-  curl -fsSL "https://nginx.org$k" | gpg -q --import 2>/dev/null
+  curl -fsSL "https://nginx.org$k" 2>/dev/null | gpg -q --import 2>/dev/null || echo "skipping unavailable key $k"
 done
 gpg --verify "nginx-$NGINX_VERSION.tar.gz.asc" "nginx-$NGINX_VERSION.tar.gz"
 tar xzf "nginx-$NGINX_VERSION.tar.gz"
